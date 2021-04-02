@@ -1,0 +1,228 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../../../Common/Sources/Application/application.h
+common.h
+../../../Common/Sources/Application/common.h
+Scene/scene.h
+../../../Common/Sources/Application/Scene/scene.h
+context.h
+../../../Common/Sources/Application/context.h
+Event/input.h
+../../../Common/Sources/Application/Event/input.h
+Time/time.h
+../../../Common/Sources/Application/Time/time.h
+
+../../../Common/Sources/Application/config.h
+string
+-
+
+../../../Common/Sources/Application/context.h
+SDL2/SDL.h
+-
+common.h
+../../../Common/Sources/Application/common.h
+
+../../../Common/Sources/Camera/arcball_camera.h
+camera.h
+../../../Common/Sources/Camera/camera.h
+
+../../../Common/Sources/Camera/camera.h
+common.h
+../../../Common/Sources/Camera/common.h
+math.h
+../../../Common/Sources/Camera/math.h
+Transform/transform.h
+../../../Common/Sources/Camera/Transform/transform.h
+Event/input.h
+../../../Common/Sources/Camera/Event/input.h
+Shader/shader.h
+../../../Common/Sources/Camera/Shader/shader.h
+component.h
+../../../Common/Sources/Camera/component.h
+
+../../../Common/Sources/Camera/cameras.h
+arcball_camera.h
+../../../Common/Sources/Camera/arcball_camera.h
+free_camera.h
+../../../Common/Sources/Camera/free_camera.h
+
+../../../Common/Sources/Camera/free_camera.h
+camera.h
+../../../Common/Sources/Camera/camera.h
+
+../../../Common/Sources/Event/event.h
+list
+-
+algorithm
+-
+memory
+-
+
+../../../Common/Sources/Event/input.h
+common.h
+../../../Common/Sources/Event/common.h
+map
+-
+vector
+-
+Event/event.h
+../../../Common/Sources/Event/Event/event.h
+event.h
+../../../Common/Sources/Event/event.h
+SDL2/SDL_keyboard.h
+-
+SDL2/SDL_events.h
+-
+
+../../../Common/Sources/GameObject/game_object.h
+vector
+-
+memory
+-
+../component.h
+../../../Common/Sources/component.h
+
+../../../Common/Sources/Mesh/vertex_array_object.h
+common.h
+../../../Common/Sources/Mesh/common.h
+math.h
+../../../Common/Sources/Mesh/math.h
+vector
+-
+type_traits
+-
+common.h
+../../../Common/Sources/Mesh/common.h
+math.h
+../../../Common/Sources/Mesh/math.h
+vector
+-
+type_traits
+-
+
+../../../Common/Sources/Postfx/postfx.h
+component.h
+../../../Common/Sources/Postfx/component.h
+Mesh/vertex_array_object.h
+../../../Common/Sources/Postfx/Mesh/vertex_array_object.h
+Shader/shader.h
+../../../Common/Sources/Postfx/Shader/shader.h
+
+../../../Common/Sources/Scene/scene.h
+common.h
+../../../Common/Sources/Scene/common.h
+GameObject/game_object.h
+../../../Common/Sources/Scene/GameObject/game_object.h
+vector
+-
+
+../../../Common/Sources/Screenshoot/screenshoot.h
+string
+-
+
+../../../Common/Sources/Shader/shader.h
+common.h
+../../../Common/Sources/Shader/common.h
+math.h
+../../../Common/Sources/Shader/math.h
+vector
+-
+
+../../../Common/Sources/Time/time.h
+common.h
+../../../Common/Sources/Time/common.h
+SDL2/SDL_timer.h
+-
+assert.h
+-
+
+../../../Common/Sources/Transform/transform.h
+common.h
+../../../Common/Sources/Transform/common.h
+math.h
+../../../Common/Sources/Transform/math.h
+Shader/shader.h
+../../../Common/Sources/Transform/Shader/shader.h
+component.h
+../../../Common/Sources/Transform/component.h
+
+../../../Common/Sources/common.h
+iostream
+-
+string
+-
+glad/glad.h
+../../../Common/Sources/glad/glad.h
+memory
+-
+
+../../../Common/Sources/component.h
+memory
+-
+
+../../../Common/Sources/glad/glad.h
+KHR/khrplatform.h
+-
+
+../../../Common/Sources/math.h
+glm/glm.hpp
+-
+glm/gtc/matrix_transform.hpp
+-
+glm/gtc/quaternion.hpp
+-
+glm/gtx/quaternion.hpp
+-
+glm/gtc/type_ptr.hpp
+-
+glm/gtx/euler_angles.hpp
+-
+glm/gtx/vector_angle.hpp
+-
+
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Postfx/postfx.cpp
+postfx.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Postfx/postfx.h
+
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Postfx/postfx.h
+component.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Postfx/component.h
+Mesh/vertex_array_object.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Postfx/Mesh/vertex_array_object.h
+Shader/shader.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Postfx/Shader/shader.h
+
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/main.cpp
+iostream
+-
+Application/application.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/Application/application.h
+Application/config.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/Application/config.h
+ray_tracing_scene.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/ray_tracing_scene.h
+
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/ray_tracing_scene.cpp
+ray_tracing_scene.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/ray_tracing_scene.h
+Camera/cameras.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/Camera/cameras.h
+Application/application.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/Application/application.h
+Screenshoot/screenshoot.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/Screenshoot/screenshoot.h
+
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/ray_tracing_scene.h
+component.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/component.h
+GameObject/game_object.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/GameObject/game_object.h
+Postfx/postfx.h
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Projects/RayTracing/Sources/Postfx/postfx.h
+

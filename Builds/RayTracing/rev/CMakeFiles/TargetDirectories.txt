@@ -1,0 +1,3 @@
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Builds/RayTracing/rev/CMakeFiles/rebuild_cache.dir
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Builds/RayTracing/rev/CMakeFiles/edit_cache.dir
+/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Builds/RayTracing/rev/CMakeFiles/RayTracing-rev.exe.dir
