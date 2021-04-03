@@ -41,7 +41,13 @@ public:
 	void set_float(const char*name, const float &v) const
 	{
 		glUniform1fv(glGetUniformLocation(program, name), 1, &v);
-  }
+    }
+    /* ---------------------------my code ---------------------*/
+    void set_int(const std::string &name, const int v) const
+    {
+        glUniform1i(glGetUniformLocation(program, name.c_str()), v);
+    }
+    /* --------------------------end_my_code-------------------*/
 	void set_vec2(const char*name, const vec2 &v) const
 	{
 		glUniform2fv(glGetUniformLocation(program, name), 1, glm::value_ptr(v));

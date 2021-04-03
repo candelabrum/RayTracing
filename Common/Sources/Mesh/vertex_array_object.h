@@ -1,4 +1,7 @@
 #pragma once
+
+#include "stbi/stb_image.h"
+
 #include "common.h"
 #include "math.h"
 #include <vector>
@@ -11,11 +14,6 @@ const  float vertices[] =
     0.0f, 0.5f, 0.0f
 };
 
-#pragma once
-#include "common.h"
-#include "math.h"
-#include <vector>
-#include <type_traits>
 class VertexArrayObject
 {
 private:
@@ -43,9 +41,61 @@ private:
     }
     InitChannel<i + 1>(channels...);
   }
+//------------------------------my_code-----------------------
+  unsigned int loadCubemap(vector<std::string> faces)
+  {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        unsigned char *data = stbi_load(faces[i].c_str(), &width, &height,
+            &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB,
+            width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout << "Cubemap failed to load at path: " << faces[i]
+            << std::endl;
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S,
+    GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T,
+    GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R,
+    GL_CLAMP_TO_EDGE);
+
+    return textureID;
+  }
+  void make_cube_map()
+  {
+    const vector<std::string> textures_faces
+    {
+        "/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Mesh/cubemap/right.jpg",
+        "/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Mesh/cubemap/left.jpg",
+        "/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Mesh/cubemap/top.jpg",
+        "/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Mesh/cubemap/bottom.jpg",
+        "/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Mesh/cubemap/front.jpg",
+        "/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Mesh/cubemap/back.jpg",
+    };
+    cubemapTexture = loadCubemap(textures_faces);
+    
+  }
+//------------------------------end_my_code-------------------
 public:
   unsigned VBO;
   unsigned VAO;
+  unsigned int cubemapTexture;
+  unsigned int texture;
 
   VertexArrayObject():
   vertexArrayBufferObject(0), numIndices(0)
@@ -68,7 +118,32 @@ public:
     glBindVertexArray(0);
     numIndices = indices.size();
 /* ----------------------------- my code ----------------------- */
-    
+/* -------------------------- load texture --------------------- */
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // set the texture wrapping/filtering options (on currently bound texture)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load and generate the texture
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("/home/pedashenko/Рабочий стол/CG/Template/OpenGLTemplate-main/Common/Sources/Mesh/container.jpg", &width, &height,
+            &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+        GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+/* ---------------------------cube-map--------------------------*/
+    make_cube_map();
+      /* 
     glGenVertexArrays(1, &VAO); 
     glGenBuffers(1, &VBO);
 
@@ -81,7 +156,7 @@ public:
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float),
                                                         (void*)0);
 
-    glEnableVertexAttribArray(1); 
+    glEnableVertexAttribArray(1); */
 /* ---------------------------- end my code ---------------------*/
 
 
@@ -92,11 +167,15 @@ public:
     glDrawElementsBaseVertex(wire_frame ? GL_LINES : GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0, 0);
     glBindVertexArray(0);
 /* ---------------------------- my code ---------------------------*/
-    
+/* --------------------------- textures ---------------------------*/
+    glBindTexture(GL_TEXTURE_2D, texture);
+/* ---------------------------- cube-map---------------------------*/
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+    /* 
     glBindVertexArray(VAO);
     //glDrawArrays(wire_frame ? GL_LINES : GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, 0);
     glDrawArrays(GL_TRIANGLES, 0, 3);
-    printf("HELP\n");
+    printf("HELP\n");*/
 /* ----------------------------end my code ------------------------*/
   }
   void render_instances(int instance)
