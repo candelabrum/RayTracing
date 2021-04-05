@@ -25,16 +25,20 @@ const float pi = acos(-1.);
 const float phi = (1.+sqrt(5.))*.5;
 const vec3 CAMERA_POS = vec3(0, 1.2, -6);
 
+
 vec3 LIGHT1_POS = vec3(-3, 3, 3);
 vec3 LIGHT1_COLOR = vec3(1, 1, 1);
+int LIGHT1_MATERIALTYPE = EMISSION;
 float LIGHT1_SCALE = 0.5;
 
 vec3 LIGHT2_POS = vec3(1, 2, -3);
 vec3 LIGHT2_COLOR = vec3(0.1, 1, 1);
+int LIGHT2_MATERIALTYPE = EMISSION;
 float LIGHT2_SCALE = 0.25;
 
 vec3 LIGHT3_POS = vec3(0, 0, 0);
 vec3 LIGHT3_COLOR = vec3(0.1, 1, 1);
+int LIGHT3_MATERIALTYPE = REFLECTION;
 float LIGHT3_SCALE = 0.5;
 
 struct Collision
@@ -46,6 +50,10 @@ struct Collision
     bool hit;
     vec3 pos;
 };
+
+Collision light1 = Collision(INF, LIGHT1_COLOR, LIGHT1_MATERIALTYPE);
+Collision light2 = Collision(INF, LIGHT2_COLOR, LIGHT2_MATERIALTYPE);
+Collision light3 = Collision(INF, LIGHT3_COLOR, LIGHT3_MATERIALTYPE);
 
 struct Ray
 {
@@ -235,6 +243,22 @@ vec3 computeLight(vec3 pos, vec3 color, vec3 normal)
          + texture(cubemap, normal).rgb * 0.1
     );
 }
+
+Collision set_next_collision(in Collision coll, in Collsion new_coll,
+                                            in Collision object)
+{
+    if (new_coll.t  < coll.t)
+    {
+        coll.t = new_coll.t;
+        coll.n = new_coll.n;
+        coll.color = object.color;
+        coll.materialType = object.materialType;
+    }
+
+    return coll;
+}
+
+    
 
 void ray_cast(Ray ray, out vec4 FragUV)
 {
