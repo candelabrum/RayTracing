@@ -38,7 +38,8 @@ float LIGHT2_SCALE = 0.25;
 
 vec3 LIGHT3_POS = vec3(0, 0, 0);
 vec3 LIGHT3_COLOR = vec3(0.1, 1, 1);
-int LIGHT3_MATERIALTYPE = REFLECTION;
+//int LIGHT3_MATERIALTYPE = REFLECTION;
+int LIGHT3_MATERIALTYPE = REFRACTION;
 float LIGHT3_SCALE = 0.5;
 
 struct Collision
@@ -51,9 +52,15 @@ struct Collision
     vec3 pos;
 };
 
-Collision light1 = Collision(INF, LIGHT1_COLOR, LIGHT1_MATERIALTYPE);
-Collision light2 = Collision(INF, LIGHT2_COLOR, LIGHT2_MATERIALTYPE);
-Collision light3 = Collision(INF, LIGHT3_COLOR, LIGHT3_MATERIALTYPE);
+struct Object
+{
+    vec3 color;
+    int materialType;
+};
+
+Object light1 = Object(LIGHT1_COLOR, LIGHT1_MATERIALTYPE);
+Object light2 = Object(LIGHT2_COLOR, LIGHT2_MATERIALTYPE);
+Object light3 = Object(LIGHT3_COLOR, LIGHT3_MATERIALTYPE);
 
 struct Ray
 {
@@ -240,32 +247,56 @@ vec3 computeLight(vec3 pos, vec3 color, vec3 normal)
     return color * (
         max(0.0, dot(normal, normalize(toLight1))) * att1 * LIGHT1_COLOR
         + max(0.0, dot(normal, normalize(toLight2))) * att2 * LIGHT2_COLOR
-         + texture(cubemap, normal).rgb * 0.1
+         + 0.1*texture(cubemap, normal).rgb
     );
 }
 
-Collision set_next_collision(in Collision coll, in Collsion new_coll,
-                                            in Collision object)
+Collision set_next_coll(Collision coll, Collision new_coll,
+                                            Object object)
 {
     if (new_coll.t  < coll.t)
     {
         coll.t = new_coll.t;
         coll.n = new_coll.n;
-        coll.color = object.color;
+        if (object.materialType == EMISSION ||
+                object.materialType == DIFFUSE)
+            coll.color = object.color;
         coll.materialType = object.materialType;
     }
 
     return coll;
 }
 
+vec3 refraction(vec3 v, vec3 normal, float n1, float n2)
+{
+    if (dot(v, normal) < 0.0)
+    {
+        normal = -normal;
+    }
+    float cosA = dot(v, normal);
+    float sinA = sqrt(1.0 - cosA * cosA);
+
+    vec3 tang = normalize(v - cosA * normal);
+
+    float sinB = sinA / n2 * n1;
+    float cosB = sqrt(1.0 - sinB * sinB);
     
+    return sinB * tang + cosB * normal;
+}
 
 void ray_cast(Ray ray, out vec4 FragUV)
 {
     vec3 viewVec = ray.dir;
 
+    const float GLASS_N = 1.5;
+    const float AIR_N = 1.0;
+    
+    float n1 = AIR_N;
+    float n2 = GLASS_N;
+
     for (int i = 0; i < 10; i++)
     {
+/* ------------------------------Plane---------------------------*/
         Collision coll;
         
         coll.t = INF;
@@ -273,45 +304,28 @@ void ray_cast(Ray ray, out vec4 FragUV)
         coll = get_best_collision(ray, coll.n);
 
         FragUV = vec4(coll.color, 1);
+/* ----------------------------end_Plane--------------------------*/
+/*-----------------------------light1-----------------------------*/
         
         Collision new_coll = get_dodecahedron_coll(d1, ray);
-        float light1T = new_coll.t;
+        coll = set_next_coll(coll, new_coll, light1);
 
-        if (light1T < coll.t)
-        {
-            coll.t = light1T;
-            coll.materialType = EMISSION;
-            coll.color = LIGHT1_COLOR;
-            coll.n = new_coll.n;
-            
-            //FragUV = vec4(coll.color, 1);
-            FragUV = vec4(coll.color, 1);
-        }
+        FragUV = vec4(coll.color, 1); 
+/*----------------------------end_light1---------------------------*/
+/*-----------------------------light2------------------------------*/
 
         new_coll = get_dodecahedron_coll(d2, ray);
-        float light2T = new_coll.t;
-        if (light2T < coll.t)
-        {
-            coll.t = light2T;
-            coll.materialType = EMISSION;
-            coll.color = LIGHT2_COLOR;
-            coll.n = new_coll.n;
-            
-            //FragUV = vec4(coll.color, 1);
-            FragUV = vec4(coll.color, 1);
-        }
+        coll = set_next_coll(coll, new_coll, light2);
+
+        FragUV = vec4(coll.color, 1);
+/*----------------------------end_light2----------------------------*/
+/*----------------------------light3--------------------------------*/
 
         new_coll = get_dodecahedron_coll(d3, ray);
-        float light3T = new_coll.t;
-        if (light3T < coll.t)
-        {
-            coll.t = light3T;
-            coll.materialType = REFLECTION;
-            coll.n = new_coll.n;
-            
-            //FragUV = vec4(coll.color, 1);
-            //FragUV = vec4(coll.color, 1);
-        }
+        coll = set_next_coll(coll, new_coll, light3);
+
+        FragUV = vec4(coll.color, 1);
+/*---------------------------end_light3-----------------------------*/
 
         if (coll.t != INF)
         {
@@ -319,7 +333,6 @@ void ray_cast(Ray ray, out vec4 FragUV)
 
             if (coll.materialType == EMISSION)
             {
-               //FragUV = vec4(coll.color, 1);
                FragUV = vec4(coll.color, 1);
                break;
             } else if (coll.materialType == DIFFUSE)
@@ -327,8 +340,23 @@ void ray_cast(Ray ray, out vec4 FragUV)
                 FragUV = vec4(computeLight(worldPos, coll.color,
                                                     coll.n), 1);
                 break;
-            } 
+            } else if (coll.materialType == REFLECTION)
+            {
+                ray.dir = reflect(ray.dir, coll.n);
+                ray.pos = worldPos + ray.dir * 0.01;
 
+                break;
+                
+            } else if (coll.materialType == REFRACTION)
+            {
+                float tmp = n1;
+
+                ray.dir = refraction(ray.dir, coll.n, n1, n2);
+                ray.pos = worldPos + ray.dir * 0.001;
+
+                n1 = n2;
+                n2 = tmp;
+            }
         }
         else 
         {
