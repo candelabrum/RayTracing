@@ -1,0 +1,78 @@
+#version 440
+in vec2 fragUV;
+out vec4 FragColor;
+
+uniform mat4 ProjViewInv;
+//uniform vec3 CameraPos;
+const vec3 CAMERA_POS = vec3(0, 1.2, -6);
+
+uniform sampler2D London;
+uniform samplerCube cubemap;
+vec4[100][100] a;
+#define FAR_INF 1e9
+#define EPS 1e-4
+#define RAY_DEPTH 7
+#define STACK_SIZE 130
+const float INF = 1e10;
+
+//(CAMERA_POS + t * viewVec).y == -1
+// t = (-1 - CAMERA_POS.y) / viewVec.y;
+
+
+float tracePlane(vec3 pos, vec3 dir)
+{
+    float t = (-1.0 - pos.y) / dir.y;
+
+    if (t <= 0.0)
+    {
+        return INF;
+    }
+    vec3 worldPos = t * dir + pos;
+
+    if (dot(worldPos.xz, worldPos.xz) >= 100.0)
+    {
+        return INF;
+    }
+
+    return t;
+}
+
+void main()
+{ 
+//-----------------------------make ViewVec ----------------
+    vec2 uv = fragUV;
+    vec3 col = vec3(0.001, 0.001, 0.001);
+    vec3 front = normalize(-CAMERA_POS);
+    vec3 up = vec3(0, 1, 0);
+    vec3 right = normalize(cross(front, up));
+    up = normalize(cross(right, front));
+    vec3 viewVec = normalize(front + right * uv.x + up * uv.y);
+//--------------------------Street Raycing------------------
+    
+    
+//------------------------loop for tracing-----------------
+    for (int i = 0; i < 10; i++)
+    {
+        float t = INF;
+        float planeT = tracePlane(CAMERA_POS, viewVec);
+        if (planeT < t)
+        {
+            t = planeT;
+        }
+        if (t != INF)
+        {
+            vec3 worldPos = t * viewVec + CAMERA_POS;
+
+            //FragColor = texture(London, worldPos.xz);
+
+            //FragColor = vec4(1, 0, 0, 1);
+            FragColor = texture(cubemap, viewVec);
+
+        }
+        else 
+        {
+            FragColor = texture(cubemap, viewVec);
+        }
+            
+    }
+}
