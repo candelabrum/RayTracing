@@ -324,9 +324,9 @@ void ray_cast(Ray ray, out vec4 FragUV)
 
         coll = get_best_collision(ray, coll.n);
         coll.color = vec4(1, 1, 0, 1).rgb;
-        coll.color = texture(cubemap, vec3(ray.dir.x, 3*ray.dir.y + 2*ray.dir.z, -2*ray.dir.z)).rgb;
+        coll.color = texture(cubemap, vec3(ray.dir.x, -ray.dir.y,  ray.dir.z)).rgb;
 
-        FragUV = texture(cubemap, vec3(ray.dir.x, 3*ray.dir.y + 2*ray.dir.z, -2*ray.dir.z));
+        FragUV = texture(cubemap, vec3(ray.dir.x, -ray.dir.y, ray.dir.z));
         //FragUV = vec4(1, 1, 0, 1);
 
         //FragUV = vec4(coll.color, 1);
@@ -369,8 +369,8 @@ void ray_cast(Ray ray, out vec4 FragUV)
                 break;
             } else if (coll.materialType == REFLECTION)
             {
-                ray.dir = reflect(ray.dir, coll.n);
                 ray.pos = worldPos + ray.dir * 0.00001;
+                ray.dir = reflect(ray.dir, coll.n);
             }    
             else if (coll.materialType == REFRACTION)
             {
