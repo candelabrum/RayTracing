@@ -344,7 +344,7 @@ void ray_cast(Ray ray, out vec4 FragUV)
     float n1 = AIR_N;
     float n2 = GLASS_N;
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 1; i++)
     {
 /* ------------------------------Plane---------------------------*/
         Collision coll;
@@ -385,8 +385,8 @@ void ray_cast(Ray ray, out vec4 FragUV)
         new_coll = get_dodecahedron_coll(d3, ray);
         coll = set_next_coll(coll, new_coll, light3);
 
-        FragUV = vec4(coll.color, 1);
-        //FragUV = vec4(coll.n, 1);
+        //FragUV = vec4(coll.color, 1);
+        FragUV = vec4(coll.n, 1);
 
 /*---------------------------end_light3-----------------------------*/
 /*---------------------------cylinder-------------------------------*/
