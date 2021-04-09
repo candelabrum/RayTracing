@@ -20,7 +20,7 @@ void RayTracingScene::postfx_render()
   vec3 camPos = camTransform[3];
   shader.set_vec3("CameraPos", camPos);
   // --------------------------my-code----------------------------
-  shader.set_int("cubemap", 0);
+  shader.set_int("cubemap", 1);
   shader.set_int("London", 0);
   // ------------------------end-my-code--------------------------
 }

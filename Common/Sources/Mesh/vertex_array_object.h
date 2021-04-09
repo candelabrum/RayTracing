@@ -45,9 +45,10 @@ private:
   unsigned int loadCubemap(vector<std::string> faces)
   {
     unsigned int textureID;
+    int width, height, nrChannels;
+
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-    int width, height, nrChannels;
     for (unsigned int i = 0; i < faces.size(); i++)
     {
         unsigned char *data = stbi_load(faces[i].c_str(), &width, &height,
@@ -168,8 +169,11 @@ public:
     glBindVertexArray(0);
 /* ---------------------------- my code ---------------------------*/
 /* --------------------------- textures ---------------------------*/
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
+
 /* ---------------------------- cube-map---------------------------*/
+    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
     /* 
     glBindVertexArray(VAO);

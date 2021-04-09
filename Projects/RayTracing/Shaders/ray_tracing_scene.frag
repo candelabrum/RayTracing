@@ -32,7 +32,7 @@ int LIGHT1_MATERIALTYPE = EMISSION;
 float LIGHT1_SCALE = 0.5;
 
 vec3 LIGHT2_POS = vec3(1, 2, -3);
-vec3 LIGHT2_COLOR = vec3(0.1, 1, 1);
+vec3 LIGHT2_COLOR = vec3(0, 1, 0);
 int LIGHT2_MATERIALTYPE = EMISSION;
 float LIGHT2_SCALE = 0.25;
 
@@ -242,11 +242,11 @@ Collision get_best_collision(Ray ray, out vec3 normal)
 
         coll.t = planeT;
         coll.materialType = DIFFUSE;
-        coll.n= vec3(0, 1, 0);
+        coll.n= normal;
 
         vec3 worldPos = coll.t * ray.dir+ ray.pos;
 
-        coll.color = texture(London, worldPos.xz * 0.1).rgb;
+        coll.color = texture(London, worldPos.xz).rgb;
     }
 
     return coll;
@@ -320,9 +320,17 @@ void ray_cast(Ray ray, out vec4 FragUV)
         
         coll.t = INF;
         
-        coll = get_best_collision(ray, coll.n);
+        vec3 worldPos = coll.t * ray.dir+ ray.pos;
 
-        FragUV = vec4(coll.color, 1);
+        coll = get_best_collision(ray, coll.n);
+        coll.color = vec4(1, 1, 0, 1).rgb;
+        coll.color = texture(cubemap, vec3(ray.dir.x, 3*ray.dir.y + 2*ray.dir.z, -2*ray.dir.z)).rgb;
+
+        FragUV = texture(cubemap, vec3(ray.dir.x, 3*ray.dir.y + 2*ray.dir.z, -2*ray.dir.z));
+        //FragUV = vec4(1, 1, 0, 1);
+
+        //FragUV = vec4(coll.color, 1);
+
 /* ----------------------------end_Plane--------------------------*/
 /*-----------------------------light1-----------------------------*/
         
@@ -361,24 +369,24 @@ void ray_cast(Ray ray, out vec4 FragUV)
                 break;
             } else if (coll.materialType == REFLECTION)
             {
-                ray.dir = reflect(ray.dir, coll.n);
-                ray.pos = worldPos + ray.dir * 0.01;
-                
-            } else if (coll.materialType == REFRACTION)
+                //#ray.dir = reflect(ray.dir, coll.n);
+                //#ray.pos = worldPos + ray.dir * 0.01;
+            }    
+            else if (coll.materialType == REFRACTION)
             {
-                float tmp = n1;
+                //#float tmp = n1;
 
-                ray.dir = refraction(ray.dir, coll.n, n1, n2);
-                //ray.dir = normalize(refract(ray.dir, coll.n, n1/n2));
-                ray.pos = worldPos + ray.dir * 0.000001;
+                //#ray.dir = refraction(ray.dir, coll.n, n1, n2);
+                //#//ray.dir = normalize(refract(ray.dir, coll.n, n1/n2));
+                //#ray.pos = worldPos + ray.dir * 0.000001;
 
-                n1 = n2;
-                n2 = tmp;
+                //#n1 = n2;
+                //#n2 = tmp;
             }
         }
         else 
         {
-            FragUV = vec4(0, 0, 0, 1);
+            FragUV = vec4(texture(cubemap, ray.dir));
         }
     }
 }
