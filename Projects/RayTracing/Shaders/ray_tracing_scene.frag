@@ -369,8 +369,8 @@ void ray_cast(Ray ray, out vec4 FragUV)
                 break;
             } else if (coll.materialType == REFLECTION)
             {
-                ray.pos = worldPos + ray.dir * 0.00001;
                 ray.dir = reflect(ray.dir, coll.n);
+                ray.pos = worldPos + ray.dir * 0.00001;
             }    
             else if (coll.materialType == REFRACTION)
             {
