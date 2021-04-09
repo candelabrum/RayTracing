@@ -26,7 +26,7 @@ const float phi = (1.+sqrt(5.))*.5;
 const vec3 CAMERA_POS = vec3(0, 1.2, -6);
 
 
-vec3 LIGHT1_POS = vec3(-3, 3, 3);
+vec3 LIGHT1_POS = vec3(-4, 3, 3);
 vec3 LIGHT1_COLOR = vec3(1, 1, 1);
 int LIGHT1_MATERIALTYPE = EMISSION;
 float LIGHT1_SCALE = 0.5;
@@ -38,8 +38,8 @@ float LIGHT2_SCALE = 0.25;
 
 vec3 LIGHT3_POS = vec3(0, 0, 0);
 vec3 LIGHT3_COLOR = vec3(0.1, 1, 1);
-//int LIGHT3_MATERIALTYPE = REFLECTION;
-int LIGHT3_MATERIALTYPE = REFRACTION;
+int LIGHT3_MATERIALTYPE = REFLECTION;
+//int LIGHT3_MATERIALTYPE = REFRACTION;
 float LIGHT3_SCALE = 0.5;
 
 struct Collision
@@ -78,7 +78,8 @@ struct Dodecahedron
 
 Dodecahedron d1 = Dodecahedron(LIGHT1_POS, LIGHT1_SCALE, EMISSION);
 Dodecahedron d2 = Dodecahedron(LIGHT2_POS, LIGHT2_SCALE, EMISSION);
-Dodecahedron d3 = Dodecahedron(LIGHT3_POS, LIGHT3_SCALE, REFLECTION);
+Dodecahedron d3 = Dodecahedron(LIGHT3_POS, LIGHT3_SCALE,
+                                    LIGHT3_MATERIALTYPE);
 
 
 /* ---------------------magic with dodecahedron-------------------*/
@@ -186,7 +187,7 @@ Ray get_ray(vec2 uv)
 
 float tracePlane(Ray ray, out vec3 normal)
 {
-    float t = (-1.0 - ray.pos.y) / ray.dir.y;
+    float t = (-1.5 - ray.pos.y) / ray.dir.y;
 
     if (t <= 0.0)
     {
@@ -201,6 +202,24 @@ float tracePlane(Ray ray, out vec3 normal)
     normal = vec3(0, 1, 0);
 
     return t;
+}
+
+float traceCylinder(vec3 pos, vec3 dir, out vec3 normal)
+{
+    float t = (-1.0 - pos.y) / dir.y;
+
+    if (t <= 0.0)
+    {
+        return INF;
+    }
+    vec3 worldPos = t * dir + pos;
+    if (dot(worldPos.xz, worldPos.xz) < 0.25)
+    {
+        normal = vec3(0, 1, 0);
+        return  t;
+    }
+
+    return INF;
 }
 
 Collision get_best_collision(Ray ray, out vec3 normal) 
@@ -288,7 +307,7 @@ void ray_cast(Ray ray, out vec4 FragUV)
 {
     vec3 viewVec = ray.dir;
 
-    const float GLASS_N = 1.5;
+    const float GLASS_N = 2.5;
     const float AIR_N = 1.0;
     
     float n1 = AIR_N;
@@ -344,15 +363,14 @@ void ray_cast(Ray ray, out vec4 FragUV)
             {
                 ray.dir = reflect(ray.dir, coll.n);
                 ray.pos = worldPos + ray.dir * 0.01;
-
-                break;
                 
             } else if (coll.materialType == REFRACTION)
             {
                 float tmp = n1;
 
                 ray.dir = refraction(ray.dir, coll.n, n1, n2);
-                ray.pos = worldPos + ray.dir * 0.001;
+                //ray.dir = normalize(refract(ray.dir, coll.n, n1/n2));
+                ray.pos = worldPos + ray.dir * 0.000001;
 
                 n1 = n2;
                 n2 = tmp;
