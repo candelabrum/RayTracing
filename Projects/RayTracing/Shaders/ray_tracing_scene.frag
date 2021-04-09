@@ -23,10 +23,10 @@ const int REFRACTION = 3;
 
 const float pi = acos(-1.);
 const float phi = (1.+sqrt(5.))*.5;
-const vec3 CAMERA_POS = vec3(0, 1.2, -6);
+const vec3 CAMERA_POS = vec3(-2, 2, -4);
 
 
-vec3 LIGHT1_POS = vec3(-0, 3, 1);
+vec3 LIGHT1_POS = vec3(-3, 2, 3);
 vec3 LIGHT1_COLOR = vec3(1, 1, 1);
 int LIGHT1_MATERIALTYPE = EMISSION;
 float LIGHT1_SCALE = 0.5;
@@ -158,15 +158,21 @@ Collision get_dodecahedron_coll(Dodecahedron d, Ray ray)
 
     coll.materialType = d.materialType;
 
-    //ray.pos.yz = rotate(ray.pos.yz, .5);
-    //ray.dir.yz = rotate(ray.dir.yz, .5);
+    //ray.pos.yz = rotate(ray.pos.yz, 0.);
+    //ray.dir.yz = rotate(ray.dir.yz, 0.);
 
-    //ray.pos.xz = rotate(ray.pos.xz, 1.2);
-    //ray.dir.xz = rotate(ray.dir.xz, 1.2);
+    //ray.pos.xz = rotate(ray.pos.xz, 0.5);
+    //ray.dir.xz = rotate(ray.dir.xz, 0.5);
 
     ray.pos = ray.pos - d.pos;
 
     trace(ray, d.scale, coll);
+
+    //ray.pos.yz = rotate(ray.pos.yz, 0.);
+    //ray.dir.yz = rotate(ray.dir.yz, 0.);
+
+    //ray.pos.xz = rotate(ray.pos.xz, -0.5);
+    //ray.dir.xz = rotate(ray.dir.xz, -0.5);
 
     return coll;
 }
@@ -187,7 +193,7 @@ Ray get_ray(vec2 uv)
 
 float tracePlane(Ray ray, out vec3 normal)
 {
-    float t = (-1.5 - ray.pos.y) / ray.dir.y;
+    float t = (-1.2 - ray.pos.y) / ray.dir.y;
 
     if (t <= 0.0)
     {
@@ -207,20 +213,45 @@ float tracePlane(Ray ray, out vec3 normal)
 float traceCylinder(vec3 pos, vec3 dir, out vec3 normal)
 {
     float t = (-1.0 - pos.y) / dir.y;
-
-    if (t <= 0.0)
-    {
+    if (t <= 0.0) {
         return INF;
     }
     vec3 worldPos = t * dir + pos;
-    if (dot(worldPos.xz, worldPos.xz) < 0.25)
-    {
+    if (dot(worldPos.xz, worldPos.xz) < 0.5) {
         normal = vec3(0, 1, 0);
-        return  t;
+        return t;
     }
 
+    // dot(pos + t * dir, pos + t * dir) == r * r;
+    // dot(pos, pos) + 2 * t * dot(pos, dir) + t * t * dot(dir, dir) == r * r
+    // t * t + 2.0 * t * dot(pos, dir) + dot(pos, pos) - r * r == 0
+    float a = dot(dir.xz, dir.xz);
+    float b = dot(pos.xz, dir.xz);
+    float c = dot(pos.xz, pos.xz) - 0.5;
+    float D = b * b - a * c;
+    if (D < 0.0) {
+        return INF;
+    }
+    t = (-b - sqrt(D)) / a;
+    if (t > 0.0) {
+        worldPos = t * dir + pos;
+        if (worldPos.y <= -1.0) {
+            normal = normalize(vec3(worldPos.x, 0, worldPos.z));
+            return t;
+        }
+    }
+    t = (-b + sqrt(D)) / a;
+    if (t < 0.0) {
+        return INF;
+    }
+    worldPos = t * dir + pos;
+    if (worldPos.y <= -1.0) {
+        normal = normalize(vec3(worldPos.x, 0, worldPos.z));
+        return t;
+    }
     return INF;
 }
+
 
 Collision get_best_collision(Ray ray, out vec3 normal) 
 {
@@ -307,7 +338,7 @@ void ray_cast(Ray ray, out vec4 FragUV)
 {
     vec3 viewVec = ray.dir;
 
-    const float GLASS_N = 2.5;
+    const float GLASS_N = 1.5;
     const float AIR_N = 1.0;
     
     float n1 = AIR_N;
@@ -326,7 +357,6 @@ void ray_cast(Ray ray, out vec4 FragUV)
         coll.color = vec4(1, 1, 0, 1).rgb;
         //coll.color = texture(cubemap, vec3(ray.dir.x, -ray.dir.y,  ray.dir.z)).rgb;
         coll.color = texture(cubemap, vec3(ray.dir.x, ray.dir.y,  -2*ray.dir.z)).rgb;
-
 
         FragUV = texture(cubemap, vec3(ray.dir.x, -ray.dir.y, ray.dir.z));
         //FragUV = texture(cubemap, vec3(ray.dir.x, -ray.dir.y, -2*ray.dir.z));
@@ -356,7 +386,23 @@ void ray_cast(Ray ray, out vec4 FragUV)
         coll = set_next_coll(coll, new_coll, light3);
 
         FragUV = vec4(coll.color, 1);
+        //FragUV = vec4(coll.n, 1);
+
 /*---------------------------end_light3-----------------------------*/
+/*---------------------------cylinder-------------------------------*/
+        vec3 cylNorm;
+
+        float cylT = traceCylinder(ray.pos, ray.dir, cylNorm);
+        if (cylT < coll.t) 
+        {
+            coll.t = cylT;
+            coll.materialType = DIFFUSE;
+            vec3 worldPos = coll.t * ray.dir+ ray.pos;
+            //coll.color = texture(iChannel2, worldPos.xz * worldPos.y).rgb;
+            coll.color = texture(cubemap, vec3(worldPos.xz*worldPos.y, 1)).rgb;
+            //coll.color = vec3(0, 1, 0);
+            coll.n = cylNorm;
+        }
 
         if (coll.t != INF)
         {
@@ -378,14 +424,14 @@ void ray_cast(Ray ray, out vec4 FragUV)
             }    
             else if (coll.materialType == REFRACTION)
             {
-                //#float tmp = n1;
+                float tmp = n1;
 
-                //#ray.dir = refraction(ray.dir, coll.n, n1, n2);
-                //#//ray.dir = normalize(refract(ray.dir, coll.n, n1/n2));
-                //#ray.pos = worldPos + ray.dir * 0.000001;
+                ray.dir = normalize(refraction(ray.dir, coll.n, n1, n2));
+                //ray.dir = normalize(refract(ray.dir, coll.n, n1/n2));
+                ray.pos = worldPos + ray.dir * 0.00001;
 
-                //#n1 = n2;
-                //#n2 = tmp;
+                n1 = n2;
+                n2 = tmp;
             }
         }
         else 
