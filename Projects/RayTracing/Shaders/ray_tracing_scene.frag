@@ -26,12 +26,12 @@ const float phi = (1.+sqrt(5.))*.5;
 const vec3 CAMERA_POS = vec3(0, 1.2, -6);
 
 
-vec3 LIGHT1_POS = vec3(-4, 3, 3);
+vec3 LIGHT1_POS = vec3(-0, 3, 1);
 vec3 LIGHT1_COLOR = vec3(1, 1, 1);
 int LIGHT1_MATERIALTYPE = EMISSION;
 float LIGHT1_SCALE = 0.5;
 
-vec3 LIGHT2_POS = vec3(1, 2, -3);
+vec3 LIGHT2_POS = vec3(2, 0, -2);
 vec3 LIGHT2_COLOR = vec3(0, 1, 0);
 int LIGHT2_MATERIALTYPE = EMISSION;
 float LIGHT2_SCALE = 0.25;
@@ -40,7 +40,7 @@ vec3 LIGHT3_POS = vec3(0, 0, 0);
 vec3 LIGHT3_COLOR = vec3(0.1, 1, 1);
 int LIGHT3_MATERIALTYPE = REFLECTION;
 //int LIGHT3_MATERIALTYPE = REFRACTION;
-float LIGHT3_SCALE = 0.5;
+float LIGHT3_SCALE = 1;
 
 struct Collision
 {
@@ -324,9 +324,13 @@ void ray_cast(Ray ray, out vec4 FragUV)
 
         coll = get_best_collision(ray, coll.n);
         coll.color = vec4(1, 1, 0, 1).rgb;
-        coll.color = texture(cubemap, vec3(ray.dir.x, -ray.dir.y,  ray.dir.z)).rgb;
+        //coll.color = texture(cubemap, vec3(ray.dir.x, -ray.dir.y,  ray.dir.z)).rgb;
+        coll.color = texture(cubemap, vec3(ray.dir.x, ray.dir.y,  -2*ray.dir.z)).rgb;
+
 
         FragUV = texture(cubemap, vec3(ray.dir.x, -ray.dir.y, ray.dir.z));
+        //FragUV = texture(cubemap, vec3(ray.dir.x, -ray.dir.y, -2*ray.dir.z));
+        
         //FragUV = vec4(1, 1, 0, 1);
 
         //FragUV = vec4(coll.color, 1);
