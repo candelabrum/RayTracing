@@ -23,7 +23,7 @@ const int REFRACTION = 3;
 
 const float pi = acos(-1.);
 const float phi = (1.+sqrt(5.))*.5;
-const vec3 CAMERA_POS = vec3(0, 1.2, -6);
+const vec3 CAMERA_POS = vec3(0, 0.2, -6);
 
 
 vec3 LIGHT1_POS = vec3(-0, 3, 1);
