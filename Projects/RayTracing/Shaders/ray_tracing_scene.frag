@@ -23,15 +23,15 @@ const int REFRACTION = 3;
 
 const float pi = acos(-1.);
 const float phi = (1.+sqrt(5.))*.5;
-const vec3 CAMERA_POS = vec3(-2, 2, -4);
+const vec3 CAMERA_POS = vec3(0, 1.2, -6);
 
 
-vec3 LIGHT1_POS = vec3(-3, 2, 3);
+vec3 LIGHT1_POS = vec3(0, 4, 0);
 vec3 LIGHT1_COLOR = vec3(1, 1, 1);
 int LIGHT1_MATERIALTYPE = EMISSION;
 float LIGHT1_SCALE = 0.5;
 
-vec3 LIGHT2_POS = vec3(2, 0, -2);
+vec3 LIGHT2_POS = vec3(0, 6, 0);
 vec3 LIGHT2_COLOR = vec3(0, 1, 0);
 int LIGHT2_MATERIALTYPE = EMISSION;
 float LIGHT2_SCALE = 0.25;
@@ -344,7 +344,7 @@ void ray_cast(Ray ray, out vec4 FragUV)
     float n1 = AIR_N;
     float n2 = GLASS_N;
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 10; i++)
     {
 /* ------------------------------Plane---------------------------*/
         Collision coll;
@@ -356,10 +356,10 @@ void ray_cast(Ray ray, out vec4 FragUV)
         coll = get_best_collision(ray, coll.n);
         coll.color = vec4(1, 1, 0, 1).rgb;
         //coll.color = texture(cubemap, vec3(ray.dir.x, -ray.dir.y,  ray.dir.z)).rgb;
-        coll.color = texture(cubemap, vec3(ray.dir.x, ray.dir.y,  -2*ray.dir.z)).rgb;
+        coll.color = texture(cubemap, vec3(ray.dir.x, ray.dir.y,  ray.dir.z)).rgb;
 
-        FragUV = texture(cubemap, vec3(ray.dir.x, -ray.dir.y, ray.dir.z));
-        //FragUV = texture(cubemap, vec3(ray.dir.x, -ray.dir.y, -2*ray.dir.z));
+        FragUV = texture(cubemap, vec3(ray.dir.x, ray.dir.y, ray.dir.z));
+        //FragUV = texture(cubemap, vec3(ray.dir.x, -ray.dir.y, 2*ray.dir.z));
         
         //FragUV = vec4(1, 1, 0, 1);
 
@@ -384,9 +384,11 @@ void ray_cast(Ray ray, out vec4 FragUV)
 
         new_coll = get_dodecahedron_coll(d3, ray);
         coll = set_next_coll(coll, new_coll, light3);
+        coll.materialType = REFLECTION;
+        coll.n = new_coll.n;
 
         //FragUV = vec4(coll.color, 1);
-        FragUV = vec4(coll.n, 1);
+        //FragUV = vec4(coll.n, 1);
 
 /*---------------------------end_light3-----------------------------*/
 /*---------------------------cylinder-------------------------------*/
@@ -419,7 +421,7 @@ void ray_cast(Ray ray, out vec4 FragUV)
                 break;
             } else if (coll.materialType == REFLECTION)
             {
-                ray.pos = worldPos + ray.dir * 0.00001;
+                ray.pos = worldPos + 0.00001*ray.dir;
                 ray.dir = reflect(ray.dir, coll.n);
             }    
             else if (coll.materialType == REFRACTION)
@@ -428,7 +430,7 @@ void ray_cast(Ray ray, out vec4 FragUV)
 
                 ray.dir = normalize(refraction(ray.dir, coll.n, n1, n2));
                 //ray.dir = normalize(refract(ray.dir, coll.n, n1/n2));
-                ray.pos = worldPos + ray.dir * 0.00001;
+                ray.pos = worldPos; //+ ray.dir * 0.00001;
 
                 n1 = n2;
                 n2 = tmp;
