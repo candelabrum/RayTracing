@@ -8,14 +8,14 @@ uniform mat4 ProjViewInv;
 
 uniform sampler2D London;
 uniform samplerCube cubemap;
+uniform int iFrame;
 
 
 #define FAR_INF 1e9
 #define EPS 1e-4
-#define RAY_DEPTH 7
-#define STACK_SIZE 130
-const float INF = 1e10;
-
+#define RAY_DEPTH 7 
+#define STACK_SIZE 130 
+const float INF = 1e10; 
 const int EMISSION = 0;
 const int DIFFUSE = 1;
 const int REFLECTION = 2;
@@ -23,7 +23,7 @@ const int REFRACTION = 3;
 
 const float pi = acos(-1.);
 const float phi = (1.+sqrt(5.))*.5;
-const vec3 CAMERA_POS = vec3(0, 0.2, -6);
+const vec3 CAMERA_POS = vec3(0, 1.2, -6);
 
 
 vec3 LIGHT1_POS = vec3(-0, 3, 1);
@@ -38,8 +38,8 @@ float LIGHT2_SCALE = 0.25;
 
 vec3 LIGHT3_POS = vec3(0, 0, 0);
 vec3 LIGHT3_COLOR = vec3(0.1, 1, 1);
-int LIGHT3_MATERIALTYPE = REFLECTION;
-//int LIGHT3_MATERIALTYPE = REFRACTION;
+//int LIGHT3_MATERIALTYPE = REFLECTION;
+int LIGHT3_MATERIALTYPE = REFRACTION;
 float LIGHT3_SCALE = 1;
 
 struct Collision
@@ -322,15 +322,29 @@ vec3 refraction(vec3 v, vec3 normal, float n1, float n2)
     return sinB * tang + cosB * normal;
 }
 
+float pow2(float x)
+{
+    return x * x;
+}
+
+float rand(float frame)
+{
+    return fract(sin( dot( vec3(frame), vec3(12.9898, 78.233, 45.5432) )) * 43758.5453);
+}
+
 void ray_cast(Ray ray, out vec4 FragUV)
 {
+    vec3 randVals = vec3(rand(float(iFrame)), rand(float(iFrame + 5)),
+                    rand(float(iFrame + 15)));
     vec3 viewVec = ray.dir;
 
-    const float GLASS_N = 2.5;
+    const float GLASS_N = 1.5;
     const float AIR_N = 1.0;
     
     float n1 = AIR_N;
     float n2 = GLASS_N;
+
+    float GLASS_R = pow2(AIR_N - GLASS_N) / pow2(AIR_N + GLASS_N);
 
     for (int i = 0; i < 10; i++)
     {
@@ -372,9 +386,22 @@ void ray_cast(Ray ray, out vec4 FragUV)
 /*----------------------------light3--------------------------------*/
 
         new_coll = get_dodecahedron_coll(d3, ray);
-        coll = set_next_coll(coll, new_coll, light3);
+        
+        if (new_coll.t < coll.t)
+        {
+            coll.t = new_coll.t;
+            coll.n = new_coll.n;
+            if (randVals.x < GLASS_R)
+            {
+                coll.materialType = REFLECTION;
+            }
+            else
+            {
+                coll.materialType = REFRACTION;
+            }
+        }
 
-        FragUV = vec4(coll.color, 1);
+        //FragUV = vec4(coll.color, 1);
 /*---------------------------end_light3-----------------------------*/
 /*----------------------------cylinder---------------------------*/
         vec3 cylNorm;
@@ -411,14 +438,14 @@ void ray_cast(Ray ray, out vec4 FragUV)
             }    
             else if (coll.materialType == REFRACTION)
             {
-                //#float tmp = n1;
+                float tmp = n1;
 
-                //#ray.dir = refraction(ray.dir, coll.n, n1, n2);
-                //#//ray.dir = normalize(refract(ray.dir, coll.n, n1/n2));
-                //#ray.pos = worldPos + ray.dir * 0.000001;
+                ray.dir = refraction(ray.dir, coll.n, n1, n2);
+                //ray.dir = normalize(refract(ray.dir, coll.n, n1/n2));
+                ray.pos = worldPos + ray.dir * 0.000001;
 
-                //#n1 = n2;
-                //#n2 = tmp;
+                n1 = n2;
+                n2 = tmp;
             }
         }
         else 
@@ -435,7 +462,17 @@ void main()
     Ray ray = get_ray(fragUV);
         
 //------------------------loop for tracing-----------------
+/*    vec4 sum;
+    
+    FragColor = vec4(0, 0, 0, 1);
+    sum = vec4(0, 0, 0, 1);
+    for (int i = 0; i < 10; i++)
+    {
+        ray_cast(ray, FragColor);
+        sum += FragColor;
+    }
+
+    FragColor = sum / 10;  */
 
     ray_cast(ray, FragColor);
-
 }

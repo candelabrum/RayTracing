@@ -5,11 +5,12 @@
 
 RayTracingScene::RayTracingScene(Shader shader):PostFX(shader)
 {
-
+    counter = 0;
 }
 
 void RayTracingScene::postfx_render() 
 {
+  counter++;
   CameraPtr camera = main_camera();
   if (!camera)
     return;
@@ -22,6 +23,7 @@ void RayTracingScene::postfx_render()
   // --------------------------my-code----------------------------
   shader.set_int("cubemap", 1);
   shader.set_int("London", 0);
+  shader.set_int("iFrame", counter);
   // ------------------------end-my-code--------------------------
 }
 
