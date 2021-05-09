@@ -1,3 +1,7 @@
+see https://www.shadertoy.com/view/NssXD8
+
+Used code from https://github.com/Einsich/OpenGLTemplate
+
 # Linux-only:
 
 ## Install depedencies:
